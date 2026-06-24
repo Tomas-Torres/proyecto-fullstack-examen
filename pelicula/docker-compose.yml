@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+
+  mysql-pelicula:
+    image: mysql:8.0
+    container_name: mysql-pelicula
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cine_catalogo
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_pelicula_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ms-pelicula:
+    build: .
+    container_name: ms-pelicula
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_APPLICATION_NAME: ms-catalogo
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-pelicula:3306/cine_catalogo?createDatabaseIfNotExist=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_FLYWAY_ENABLED: "false"
+    depends_on:
+      mysql-pelicula:
+        condition: service_healthy
+
+volumes:
+  mysql_pelicula_data:
