@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.cine.usuario.service.UsuarioServiceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-06-24T17:57:55.249Z" hostname="TOMAS" time="1.355">
+  <properties/>
+  <testcase name="crearUsuario_emailDuplicado_lanzaExcepcion()" classname="com.cine.usuario.service.UsuarioServiceTest" time="1.31"/>
+  <testcase name="existeUsuario_inactivoRetornaFalse()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.006"/>
+  <testcase name="obtenerPorId_encontrado()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.005"/>
+  <testcase name="existeUsuario_noExisteRetornaFalse()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.002"/>
+  <testcase name="crearUsuario_exitoso()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.007"/>
+  <testcase name="eliminar_exitoso()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.004"/>
+  <testcase name="eliminar_usuarioNoExiste()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.002"/>
+  <testcase name="existeUsuario_activoRetornaTrue()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.003"/>
+  <testcase name="obtenerTodos_retornaLista()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.003"/>
+  <testcase name="obtenerActivos_retornaSoloActivos()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.002"/>
+  <testcase name="obtenerPorId_noEncontrado()" classname="com.cine.usuario.service.UsuarioServiceTest" time="0.002"/>
+  <system-out><![CDATA[13:57:56.528 [Test worker] INFO com.cine.usuario.service.UsuarioService -- Intentando crear usuario con email: juan@email.com
+13:57:56.535 [Test worker] WARN com.cine.usuario.service.UsuarioService -- Creación rechazada - email ya registrado: juan@email.com
+13:57:56.581 [Test worker] INFO com.cine.usuario.service.UsuarioService -- Intentando crear usuario con email: juan@email.com
+13:57:56.581 [Test worker] INFO com.cine.usuario.service.UsuarioService -- Usuario creado exitosamente con ID: 1
+13:57:56.587 [Test worker] INFO com.cine.usuario.service.UsuarioService -- Usuario ID 1 desactivado (soft delete)
+13:57:56.591 [Test worker] WARN com.cine.usuario.service.UsuarioService -- Eliminación fallida - usuario no encontrado con ID: 99
+13:57:56.598 [Test worker] INFO com.cine.usuario.service.UsuarioService -- Consultando todos los usuarios del sistema
+13:57:56.601 [Test worker] INFO com.cine.usuario.service.UsuarioService -- Consultando usuarios activos
+]]></system-out>
+  <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (C:\Users\tomas\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.17.8\f09415827a71be7ed621c7bd02550678f28bc81c\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

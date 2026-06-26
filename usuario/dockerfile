@@ -1,0 +1,31 @@
+# ── Etapa 1: Construcción ──────────────────────────────
+FROM eclipse-temurin:21-jdk-alpine AS builder
+
+WORKDIR /app
+
+# Copia los archivos de Gradle
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+
+# Da permisos al gradlew
+RUN chmod +x ./gradlew
+
+# Descarga dependencias
+RUN ./gradlew dependencies --no-daemon
+
+# Copia el código fuente y construye el JAR
+COPY src src
+RUN ./gradlew bootJar --no-daemon
+
+# ── Etapa 2: Imagen final ──────────────────────────────
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+EXPOSE 8081
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
