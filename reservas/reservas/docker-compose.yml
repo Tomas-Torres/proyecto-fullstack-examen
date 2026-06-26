@@ -1,0 +1,96 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-cine
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  eureka-server:
+    build: ../../eureka-server/eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+
+  gateway:
+    build: ../../gateway/gateway
+    container_name: gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+  pagos:
+    build: ../../pagos/pagos
+    container_name: pagos
+    ports:
+      - "8085:8085"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pagos_db?useSSL=false&serverTimezone=UTC
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+  reservas:
+    build: .
+    container_name: reservas
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/reservas_db?useSSL=false&serverTimezone=UTC
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+  usuarios:
+    build:
+      context: ../../usuario
+      dockerfile: Dockerfile
+    container_name: usuarios
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      DB_HOST: mysql
+      EUREKA_HOST: eureka-server
+
+  peliculas:
+    build:
+      context: ../../pelicula
+      dockerfile: Dockerfile
+    container_name: peliculas
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    environment:
+      DB_HOST: mysql
+      EUREKA_HOST: eureka-server
+
+volumes:
+  mysql_data:

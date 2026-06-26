@@ -1,9 +1,11 @@
-package com.pelicula.service;
+package com.cine.pelicula.service;
 
 import com.pelicula.dto.PeliculaRequestDTO;
 import com.pelicula.dto.PeliculaResponseDTO;
 import com.pelicula.model.Pelicula;
 import com.pelicula.repository.PeliculaRepository;
+import com.pelicula.service.PeliculaService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +17,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class PeliculaServiceTest {
 
@@ -103,3 +104,113 @@ class PeliculaServiceTest {
     @Test
     void obtenerPorGenero_retornaFiltradas() {
         when(peliculaRepository.findByGeneroAndActivoTrue("ACCION")).thenReturn(List.of(pelicula));
+
+        List<PeliculaResponseDTO> resultado = peliculaService.obtenerPorGenero("ACCION");
+
+        assertFalse(resultado.isEmpty());
+        assertEquals("ACCION", resultado.get(0).getGenero());
+    }
+
+    @Test
+    void obtenerPorId_encontrado() {
+        when(peliculaRepository.findById(1L)).thenReturn(Optional.of(pelicula));
+
+        Optional<PeliculaResponseDTO> resultado = peliculaService.obtenerPorId(1L);
+
+        assertTrue(resultado.isPresent());
+        assertEquals(1L, resultado.get().getId());
+    }
+
+    @Test
+    void obtenerPorId_noEncontrado() {
+        when(peliculaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<PeliculaResponseDTO> resultado = peliculaService.obtenerPorId(99L);
+
+        assertFalse(resultado.isPresent());
+    }
+
+    @Test
+    void actualizar_exitoso() {
+        when(peliculaRepository.findById(1L)).thenReturn(Optional.of(pelicula));
+        when(peliculaRepository.save(any(Pelicula.class))).thenReturn(pelicula);
+
+        Optional<PeliculaResponseDTO> resultado = peliculaService.actualizar(1L, requestDTO);
+
+        assertTrue(resultado.isPresent());
+        verify(peliculaRepository, times(1)).save(any(Pelicula.class));
+    }
+
+    @Test
+    void actualizar_peliculaNoExiste() {
+        when(peliculaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<PeliculaResponseDTO> resultado = peliculaService.actualizar(99L, requestDTO);
+
+        assertFalse(resultado.isPresent());
+        verify(peliculaRepository, never()).save(any());
+    }
+
+    @Test
+    void actualizar_tituloDuplicado_lanzaExcepcion() {
+        PeliculaRequestDTO dtoNuevoTitulo = new PeliculaRequestDTO(
+                "Spider-Man", "ACCION", "PG-13", 120, "Historia de Spider-Man"
+        );
+
+        when(peliculaRepository.findById(1L)).thenReturn(Optional.of(pelicula));
+        when(peliculaRepository.existsByTituloIgnoreCase("Spider-Man")).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> peliculaService.actualizar(1L, dtoNuevoTitulo));
+    }
+
+    @Test
+    void eliminar_exitoso() {
+        when(peliculaRepository.findById(1L)).thenReturn(Optional.of(pelicula));
+        when(peliculaRepository.save(any(Pelicula.class))).thenReturn(pelicula);
+
+        boolean resultado = peliculaService.eliminar(1L);
+
+        assertTrue(resultado);
+        assertFalse(pelicula.getActivo());
+        verify(peliculaRepository, times(1)).save(any(Pelicula.class));
+    }
+
+    @Test
+    void eliminar_peliculaNoExiste() {
+        when(peliculaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        boolean resultado = peliculaService.eliminar(99L);
+
+        assertFalse(resultado);
+        verify(peliculaRepository, never()).save(any());
+    }
+
+    @Test
+    void existePelicula_activaRetornaTrue() {
+        when(peliculaRepository.findById(1L)).thenReturn(Optional.of(pelicula));
+
+        boolean resultado = peliculaService.existePelicula(1L);
+
+        assertTrue(resultado);
+    }
+
+    @Test
+    void existePelicula_inactivaRetornaFalse() {
+        pelicula.setActivo(false);
+        when(peliculaRepository.findById(1L)).thenReturn(Optional.of(pelicula));
+
+        boolean resultado = peliculaService.existePelicula(1L);
+
+        assertFalse(resultado);
+    }
+
+    @Test
+    void existePelicula_noExisteRetornaFalse() {
+        when(peliculaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        boolean resultado = peliculaService.existePelicula(99L);
+
+        assertFalse(resultado);
+    }
+}

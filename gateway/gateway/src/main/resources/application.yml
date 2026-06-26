@@ -1,0 +1,38 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: reservas
+              uri: lb://reservas
+              predicates:
+                - Path=/api/reservas/**
+            - id: pagos
+              uri: lb://pagos
+              predicates:
+                - Path=/api/pagos/**
+            - id: usuarios
+              uri: lb://ms-usuarios
+              predicates:
+                - Path=/api/usuarios/**
+            - id: peliculas
+              uri: lb://ms-pelicula
+              predicates:
+                - Path=/api/peliculas/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
